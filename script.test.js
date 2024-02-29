@@ -12,6 +12,15 @@ describe("isGameOver function", () => {
 
     expect(gameOverValue).toBe("x");
   });
+  test("o wins", () => {
+    const gameOverValue = isGameOver([
+      ["o", "o", "o"],
+      ["o", "x", "x"],
+      ["x", "o", "x"],
+    ]);
+
+    expect(gameOverValue).toBe("o");
+  });
 });
 
 describe("getBestMove function", () => {

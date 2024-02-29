@@ -1,73 +1,82 @@
-var canvas = document.getElementById("myCanvas");
-var computer_p = document.getElementById("computer_p");
+const canvas = document.getElementById("myCanvas");
+const hintParagraph = document.getElementById("hint_paragraph");
 
-if (canvas) {
-  var rect_canvas = canvas.getBoundingClientRect();
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "rgb(236,238,212)";
-  ctx.fillRect(0, 0, 300, 300);
-  ctx.fillRect(600, 0, 300, 300);
-  ctx.fillRect(300, 300, 300, 300);
-  ctx.fillRect(0, 600, 300, 300);
-  ctx.fillRect(600, 600, 300, 300);
-  ctx.fillStyle = "rgb(116,150,84)";
-  ctx.fillRect(300, 0, 300, 300);
-  ctx.fillRect(0, 300, 300, 300);
-  ctx.fillRect(600, 300, 300, 300);
-  ctx.fillRect(300, 600, 300, 300);
+const imgX = new Image();
+const imgO = new Image();
+
+let field;
+let context;
+
+function initField() {
+  field = [
+    ["-", "-", "-"],
+    ["-", "-", "-"],
+    ["-", "-", "-"],
+  ];
+  if (canvas) {
+    context = canvas.getContext("2d");
+    context.fillStyle = "rgb(236,238,212)";
+    context.fillRect(0, 0, 300, 300);
+    context.fillRect(600, 0, 300, 300);
+    context.fillRect(300, 300, 300, 300);
+    context.fillRect(0, 600, 300, 300);
+    context.fillRect(600, 600, 300, 300);
+    context.fillStyle = "rgb(116,150,84)";
+    context.fillRect(300, 0, 300, 300);
+    context.fillRect(0, 300, 300, 300);
+    context.fillRect(600, 300, 300, 300);
+    context.fillRect(300, 600, 300, 300);
+  }
+
+  if (Math.floor(Math.random() * 2) == 1) {
+    const xBestMove = getBestMove(field, "x");
+    field[xBestMove.x][xBestMove.y] = "x";
+    context.drawImage(imgX, xBestMove.x * 300, xBestMove.y * 300);
+    const oBestMove = getBestMove(field, "o");
+    const oHintText =
+      "Best Move for o is: (" +
+      oBestMove.x +
+      "|" +
+      oBestMove.y +
+      ") expected to " +
+      (oBestMove.winner == "o"
+        ? "win"
+        : oBestMove.winner == "d"
+        ? "draw"
+        : "lose");
+    hintParagraph.textContent = oHintText;
+  } else {
+    hintParagraph.textContent = "You to move";
+  }
 }
 
-var feld = [
-  ["-", "-", "-"],
-  ["-", "-", "-"],
-  ["-", "-", "-"],
-];
+imgX.onload = initField;
 
-var img_x = new Image();
-var img_o = new Image();
-img_o.src = "./o.png";
-img_x.src = "./x.png";
-
-img_x.onload = function () {
-  if (Math.floor(Math.random() * 2) == 1) {
-    var ret = getBestMove(feld, "x");
-    feld[ret.x][ret.y] = "x";
-    ctx.drawImage(img_x, ret.x * 300, ret.y * 300);
-    ret = getBestMove(feld, "o");
-    var txt =
-      "Best Move for o is: (" +
-      ret.x +
-      "|" +
-      ret.y +
-      ") expected to " +
-      (ret.winner == "o" ? "win" : ret.winner == "d" ? "draw" : "lose");
-    computer_p.textContent = txt;
-  } else {
-    computer_p.textContent = "You to move";
-  }
-};
+imgO.src = "./o.png";
+imgX.src = "./x.png";
 
 if (canvas) {
+  let canvasBoundingRect = canvas.getBoundingClientRect();
   canvas.addEventListener(
     "click",
     function (event) {
-      var xVal = event.pageX - rect_canvas.left,
-        yVal = event.pageY - rect_canvas.top;
+      var xVal = event.pageX - canvasBoundingRect.left,
+        yVal = event.pageY - canvasBoundingRect.top;
       var x = Math.floor(xVal / 300);
       var y = Math.floor(yVal / 300);
-      var over = isGameOver(feld);
-      if (feld[x][y] == "-" && over == "-") {
-        feld[x][y] = "o";
-        ctx.drawImage(img_o, x * 300, y * 300);
-        over = isGameOver(feld);
+      var over = isGameOver(field);
+      if (field[x][y] == "-" && over == "-") {
+        field[x][y] = "o";
+        context.drawImage(imgO, x * 300, y * 300);
+        over = isGameOver(field);
         if (over == "-") {
-          var ret = getBestMove(feld, "x");
+          var ret = getBestMove(field, "x");
           //console.log(ret);
-          feld[ret.x][ret.y] = "x";
-          ctx.drawImage(img_x, ret.x * 300, ret.y * 300);
-          over = isGameOver(feld);
+          field[ret.x][ret.y] = "x";
+          context.drawImage(imgX, ret.x * 300, ret.y * 300);
+          over = isGameOver(field);
           if (over == "-") {
-            ret = getBestMove(feld, "o");
+            ret = getBestMove(field, "o");
             var txt =
               "Best Move for o is: (" +
               ret.x +
@@ -79,19 +88,17 @@ if (canvas) {
                 : ret.winner == "d"
                 ? "draw"
                 : "lose");
-            computer_p.textContent = txt;
+            hintParagraph.textContent = txt;
           }
         }
         if (over != "-") {
-          computer_p.textContent =
+          hintParagraph.textContent =
             (over == "o" ? "You WIN!" : over == "x" ? "You Lose!" : "Draw.") +
             " \tclick Canvas to play again";
         }
       } else {
         if (over != "-") {
-          setTimeout(() => {
-            location.reload();
-          }, 1000);
+          initField();
         }
       }
     },
@@ -192,4 +199,6 @@ function getBestMove(pos, player) {
   return ret;
 }
 
-module.exports = { isGameOver, getBestMove };
+if (module) {
+  module.exports = { isGameOver, getBestMove };
+}
