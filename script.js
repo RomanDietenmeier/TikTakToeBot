@@ -102,7 +102,6 @@ if (canvas) {
         over = isGameOver(field);
         if (over == "-") {
           var ret = getBestMove(field, "x");
-          //console.log(ret);
           field[ret.x][ret.y] = "x";
           drawImage(imgX, ret.x * cellSize, ret.y * cellSize);
           over = isGameOver(field);
@@ -171,12 +170,12 @@ function isGameOver(pos) {
 
 function getBestMove(pos, player) {
   var ret = {};
-  var retZustand = "u"; //u undifined l lose w win d draw
+  var retZustand = "u"; //u undefined l lose w win d draw
   for (var i = 0; i < 3; i++) {
     for (var j = 0; j < 3; j++) {
       if (pos[i][j] != "-") continue;
       pos[i][j] = player;
-      //printPos(pos);
+
       var status = isGameOver(pos);
       if (status == "-") {
         var z = getBestMove(pos, player == "x" ? "o" : "x");
