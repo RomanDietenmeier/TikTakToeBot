@@ -1,11 +1,41 @@
 const canvas = document.getElementById("myCanvas");
 const hintParagraph = document.getElementById("hint_paragraph");
 
+const fieldScreenPercentage = 0.8;
+let width = window.innerWidth * fieldScreenPercentage;
+let height = window.innerHeight * fieldScreenPercentage;
+
+if (width > height) {
+  width = height;
+} else {
+  height = width;
+}
+canvas.width = width;
+canvas.height = height;
+const cellSize = width / 3;
+
 const imgX = new Image();
 const imgO = new Image();
 
 let field;
 let context;
+
+function drawCell(x, y) {
+  if (!canvas) return;
+  context.fillRect(x, y, cellSize, cellSize);
+}
+
+function drawImage(img, x, y, imageScale = 0.8) {
+  if (!canvas) return;
+
+  context.drawImage(
+    img,
+    x + (cellSize * (1 - imageScale)) / 2,
+    y + (cellSize * (1 - imageScale)) / 2,
+    cellSize * imageScale,
+    cellSize * imageScale
+  );
+}
 
 function initField() {
   field = [
@@ -16,22 +46,23 @@ function initField() {
   if (canvas) {
     context = canvas.getContext("2d");
     context.fillStyle = "rgb(236,238,212)";
-    context.fillRect(0, 0, 300, 300);
-    context.fillRect(600, 0, 300, 300);
-    context.fillRect(300, 300, 300, 300);
-    context.fillRect(0, 600, 300, 300);
-    context.fillRect(600, 600, 300, 300);
+
+    drawCell(0, 0);
+    drawCell(2 * cellSize, 0);
+    drawCell(cellSize, cellSize);
+    drawCell(0, 2 * cellSize);
+    drawCell(2 * cellSize, 2 * cellSize);
     context.fillStyle = "rgb(116,150,84)";
-    context.fillRect(300, 0, 300, 300);
-    context.fillRect(0, 300, 300, 300);
-    context.fillRect(600, 300, 300, 300);
-    context.fillRect(300, 600, 300, 300);
+    drawCell(cellSize, 0);
+    drawCell(0, cellSize);
+    drawCell(2 * cellSize, cellSize);
+    drawCell(cellSize, 2 * cellSize);
   }
 
   if (Math.floor(Math.random() * 2) == 1) {
     const xBestMove = getBestMove(field, "x");
     field[xBestMove.x][xBestMove.y] = "x";
-    context.drawImage(imgX, xBestMove.x * 300, xBestMove.y * 300);
+    drawImage(imgX, xBestMove.x * cellSize, xBestMove.y * cellSize);
     const oBestMove = getBestMove(field, "o");
     const oHintText =
       "Best Move for o is: (" +
@@ -52,8 +83,8 @@ function initField() {
 
 imgX.onload = initField;
 
-imgO.src = "./o.png";
-imgX.src = "./x.png";
+imgO.src = "./o.svg";
+imgX.src = "./x.svg";
 
 if (canvas) {
   let canvasBoundingRect = canvas.getBoundingClientRect();
@@ -62,18 +93,18 @@ if (canvas) {
     function (event) {
       var xVal = event.pageX - canvasBoundingRect.left,
         yVal = event.pageY - canvasBoundingRect.top;
-      var x = Math.floor(xVal / 300);
-      var y = Math.floor(yVal / 300);
+      var x = Math.floor(xVal / cellSize);
+      var y = Math.floor(yVal / cellSize);
       var over = isGameOver(field);
       if (field[x][y] == "-" && over == "-") {
         field[x][y] = "o";
-        context.drawImage(imgO, x * 300, y * 300);
+        drawImage(imgO, x * cellSize, y * cellSize);
         over = isGameOver(field);
         if (over == "-") {
           var ret = getBestMove(field, "x");
           //console.log(ret);
           field[ret.x][ret.y] = "x";
-          context.drawImage(imgX, ret.x * 300, ret.y * 300);
+          drawImage(imgX, ret.x * cellSize, ret.y * cellSize);
           over = isGameOver(field);
           if (over == "-") {
             ret = getBestMove(field, "o");
