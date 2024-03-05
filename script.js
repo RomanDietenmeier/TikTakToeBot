@@ -86,6 +86,13 @@ imgX.onload = initField;
 imgO.src = "./o.svg";
 imgX.src = "./x.svg";
 
+function makeMove(player, x, y) {
+  if (field[x][y] != "-") return false;
+  field[x][y] = player;
+  drawImage(player == "o" ? imgO : imgX, x * cellSize, y * cellSize);
+  return true;
+}
+
 if (canvas) {
   let canvasBoundingRect = canvas.getBoundingClientRect();
   canvas.addEventListener(
@@ -95,42 +102,39 @@ if (canvas) {
       const yCanvasCoordinate = event.pageY - canvasBoundingRect.top;
       const x = Math.floor(xCanvasCoordinate / cellSize);
       const y = Math.floor(yCanvasCoordinate / cellSize);
-      var over = isGameOver(field);
-      if (field[x][y] == "-" && over == "-") {
-        field[x][y] = "o";
-        drawImage(imgO, x * cellSize, y * cellSize);
-        over = isGameOver(field);
-        if (over == "-") {
-          var ret = getBestMove(field, "x");
-          field[ret.x][ret.y] = "x";
-          drawImage(imgX, ret.x * cellSize, ret.y * cellSize);
-          over = isGameOver(field);
-          if (over == "-") {
-            ret = getBestMove(field, "o");
-            var txt =
-              "Best Move for o is: (" +
-              ret.x +
-              "|" +
-              ret.y +
-              ") expected to " +
-              (ret.winner == "ox"
-                ? "win"
-                : ret.winner == "d"
-                ? "draw"
-                : "lose");
-            hintParagraph.textContent = txt;
-          }
-        }
-        if (over != "-") {
-          hintParagraph.textContent =
-            (over == "o" ? "You WIN!" : over == "x" ? "You Lose!" : "Draw.") +
-            " \tclick Canvas to play again";
-        }
-      } else {
-        if (over != "-") {
-          initField();
-        }
+
+      let over = isGameOver(field);
+      if (over != "-") {
+        initField();
+        return;
       }
+
+      if (!makeMove("o", x, y)) return;
+
+      over = isGameOver(field);
+      if (over == "-") {
+        const bestMoveX = getBestMove(field, "x");
+        makeMove("x", bestMoveX.x, bestMoveX.y);
+      }
+      over = isGameOver(field);
+      if (over == "-") {
+        const bestMoveO = getBestMove(field, "o");
+        hintParagraph.textContent =
+          "Best Move for o is: (" +
+          bestMoveO.x +
+          "|" +
+          bestMoveO.y +
+          ") expected to " +
+          (bestMoveO.winner == "o"
+            ? "win"
+            : bestMoveO.winner == "d"
+            ? "draw"
+            : "lose");
+        return;
+      }
+      hintParagraph.textContent =
+        (over == "o" ? "You WIN!" : over == "x" ? "You Lose!" : "Draw.") +
+        " \tclick Canvas to play again";
     },
     false
   );
