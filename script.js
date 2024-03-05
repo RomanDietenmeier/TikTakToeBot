@@ -91,10 +91,10 @@ if (canvas) {
   canvas.addEventListener(
     "click",
     function (event) {
-      const xCanvasCoordinate = event.pageX - canvasBoundingRect.left;
-      const yCanvasCoordinate = event.pageY - canvasBoundingRect.top;
-      const x = Math.floor(xCanvasCoordinate / cellSize);
-      const y = Math.floor(yCanvasCoordinate / cellSize);
+      var xVal = event.pageX - canvasBoundingRect.left,
+        yVal = event.pageY - canvasBoundingRect.top;
+      var x = Math.floor(xVal / cellSize);
+      var y = Math.floor(yVal / cellSize);
       var over = isGameOver(field);
       if (field[x][y] == "-" && over == "-") {
         field[x][y] = "o";
