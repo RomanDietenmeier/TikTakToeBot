@@ -103,21 +103,19 @@ if (canvas) {
       const x = Math.floor(xCanvasCoordinate / cellSize);
       const y = Math.floor(yCanvasCoordinate / cellSize);
 
-      let over = isGameOver(field);
-      if (over != "-") {
+      if (isGameOver(field) != "-") {
         initField();
         return;
       }
 
       if (!makeMove("o", x, y)) return;
 
-      over = isGameOver(field);
-      if (over == "-") {
+      if (isGameOver(field) == "-") {
         const bestMoveX = getBestMove(field, "x");
         makeMove("x", bestMoveX.x, bestMoveX.y);
       }
-      over = isGameOver(field);
-      if (over == "-") {
+      const gameOverState = isGameOver(field);
+      if (gameOverState == "-") {
         const bestMoveO = getBestMove(field, "o");
         hintParagraph.textContent =
           "Best Move for o is: (" +
@@ -133,8 +131,11 @@ if (canvas) {
         return;
       }
       hintParagraph.textContent =
-        (over == "o" ? "You WIN!" : over == "x" ? "You Lose!" : "Draw.") +
-        " \tclick Canvas to play again";
+        (gameOverState == "o"
+          ? "You WIN!"
+          : gameOverState == "x"
+          ? "You Lose!"
+          : "Draw.") + " \tclick Canvas to play again";
     },
     false
   );
